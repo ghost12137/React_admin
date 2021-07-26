@@ -8,11 +8,13 @@ import { formateDate } from "@/utils/dateUtils";
 import { CloudOutlined } from "@ant-design/icons";
 import { withRouter } from "react-router-dom";
 import { Modal } from "antd";
+import { connect } from "react-redux";
 
 import LinkButton from '@/components/link-button';
 //引入左侧菜单文件
 import menuList from '@/config/menuConfig';
-import storageUtils from '@/utils/storageUtils.js'
+import { loginOut } from "../../../redux/actions";
+// import storageUtils from '@/utils/storageUtils.js'
 
 export class Header extends Component {
   state = {
@@ -55,10 +57,11 @@ export class Header extends Component {
       okText: '确定',
       cancelText: '取消',
       onOk: () => {
-        //清空后台数据
+        /* //清空后台数据
         storageUtils.removeUser();
         //跳转页面
-        this.props.history.replace('/login');
+        this.props.history.replace('/login'); */
+        this.props.loginOut();
       }
     });
   };
@@ -75,11 +78,15 @@ export class Header extends Component {
 
   render() {
     const { currentTime, weather } = this.state;
-    const title = this.getTitle();
+    // 得到当前需要显示的title
+    // const title = this.getTitle();
+    const title = this.props.headTitle;
+
+    const username = this.props.user.username;
     return (
       <div className="header">
         <div className="header-top">
-          <span>欢迎，admin</span>
+          <span>欢迎，{username}</span>
           <LinkButton onClick={this.logout}>退出</LinkButton>
         </div>
         <div className="header-bottom">
@@ -97,4 +104,7 @@ export class Header extends Component {
   }
 }
 
-export default withRouter(Header);
+export default connect(
+  state => ({headTitle: state.headTitle, user: state.user}),
+  {loginOut}
+)(withRouter(Header));

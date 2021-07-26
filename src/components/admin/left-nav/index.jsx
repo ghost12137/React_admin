@@ -10,7 +10,9 @@ import  "./index.less";
 import logo from '@/assets/images/logo.png';
 //引入左侧菜单文件
 import menuList from '../../../config/menuConfig';
-import storageUtils from "@/utils/storageUtils";
+// import storageUtils from "@/utils/storageUtils";
+import { setHeadTitle } from "../../../redux/actions";
+import { connect } from "react-redux";
 
 const { SubMenu } = Menu;
 
@@ -19,8 +21,10 @@ export class LeftNav extends Component {
   //判断当前登录用户对item是否有权限
   hasAuth = (item) => {
     const {key, isPublic} = item;
-    const menus = storageUtils.getUser().role.menus;
-    const username = storageUtils.getUser().username;
+    /* const menus = storageUtils.getUser().role.menus;
+    const username = storageUtils.getUser().username; */
+    const menus = this.props.user.role.menus;
+    const username = this.props.user.username;
     /**
      * 1、如果当前用户是admin
      * 2、如果当前item是公开的
@@ -78,9 +82,15 @@ export class LeftNav extends Component {
       if (this.hasAuth(item)) {
         //向pre中添加<Menu.item>或者<SubMenu>
         if (!item.children) {
+          // 判断item是否是当前对应的item
+          if (item.key === path || path.indexOf(item.key) === 0) {
+            // 更新redux中的headTitle状态
+            this.props.setHeadTitle(item.title);
+          }
+
           pre.push((
             <Menu.Item key={item.key} icon={item.icon} >
-              <Link to={item.key} title={item.title}>
+              <Link to={item.key} title={item.title} onClick={() => this.props.setHeadTitle(item.title)}>
                 {item.title}
               </Link>
             </Menu.Item>
@@ -189,4 +199,7 @@ export class LeftNav extends Component {
   }
 }
 
-export default withRouter(LeftNav);
+export default connect(
+  state => ({user: state.user}),
+  {setHeadTitle}
+)(withRouter(LeftNav));

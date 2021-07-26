@@ -5,9 +5,10 @@
 import React, { Component } from 'react'
 import { Redirect, Route, Switch } from "react-router-dom";
 import { Layout } from 'antd';
+import { connect } from "react-redux";
 
 //浏览器缓存的相关方法
-import storageUtils from "@/utils/storageUtils";
+// import storageUtils from "@/utils/storageUtils";
 //导入左侧导航栏
 import LeftNav from '../../components/admin/left-nav';
 //导入头部
@@ -21,12 +22,14 @@ import User from './childPages/user';
 import Bar from './childPages/charts/bar';
 import Line from './childPages/charts/line';
 import Pie from './childPages/charts/pie';
+import NotFound from './childPages/not-found';
 
 const { Footer, Sider, Content } = Layout;
 
 export class Admin extends Component {
   render() {
-    const user = storageUtils.getUser();
+    // const user = storageUtils.getUser();
+    const user = this.props.user;
     if (!user || !user._id) {
       //自动跳转到登录界面
       return <Redirect to="/login" />
@@ -43,6 +46,7 @@ export class Admin extends Component {
           {/* 中间内容 */}
           <Content style={{ margin: 20, backgroundColor: '#fff' }}>
             <Switch>
+              <Redirect exact={true} from='/' to='/home' />
               <Route path='/home' component={Home} /> 
               <Route path='/category' component={Category} /> 
               <Route path='/product' component={Product} /> 
@@ -51,7 +55,7 @@ export class Admin extends Component {
               <Route path='/charts/bar' component={Bar} /> 
               <Route path='/charts/line' component={Line} /> 
               <Route path='/charts/pie' component={Pie} /> 
-              <Redirect to='/home' />
+              <Route component={NotFound} />{/*上面没有一个路由匹配 ，直接显示404*/}
             </Switch>
           </Content>
           {/* 页脚 */}
@@ -62,4 +66,7 @@ export class Admin extends Component {
   }
 }
 
-export default Admin
+export default connect(
+  state => ({user: state.user}),
+  {}
+)(Admin)

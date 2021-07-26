@@ -19,6 +19,9 @@ import logo from '@/assets/images/logo.png'
 import {HandleLogin} from '../../api/login';
 //引入保存本地的函数
 import storageUtils from "@/utils/storageUtils";
+import { login } from "../../redux/actions";
+import { connect } from "react-redux";
+
 /**
  * 登录的路由组件
  */
@@ -31,7 +34,10 @@ export class Login extends Component {
   //处理提交事件
    handleFinsh = async (values) => {
     const { username, password } = values;
-    try {
+
+    // 调用分发异步action的函数 => 发登录的异步请求，有了结果后更新状态
+    this.props.login(username, password);
+    /* try {
       const data = await HandleLogin(username, password);
       // console.log('请求成功, 数据为: ', data);
       if (data.status === 0) {  //登录成功
@@ -40,12 +46,12 @@ export class Login extends Component {
         storageUtils.saveUser(data.data);
 
         //转到管理界面
-        this.props.history.replace('/');
+        this.props.history.replace('/home');
       }
     }
     catch (error) {
       console.log("请求错误: ", error);
-    }
+    } */
   };
   //自定义密码验证
   validatePwd = (rule, value, callback) => {
@@ -62,11 +68,11 @@ export class Login extends Component {
   };
 
   render() {
-    const user = storageUtils.getUser();
+    const user = this.props.user;
     console.log(user);
     if (user && user._id) {
       //自动跳转到登录界面
-      return <Redirect to="/" />
+      return <Redirect to="/home" />
     }
     return (
         <div className="login">
@@ -105,4 +111,9 @@ export class Login extends Component {
   }
 }
 
-export default Login
+export default connect(
+  state => ({user: state.user}),
+  {
+    login
+  }
+)(Login)

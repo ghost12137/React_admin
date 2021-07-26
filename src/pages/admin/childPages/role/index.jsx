@@ -14,7 +14,9 @@ import { getRoles, AddRole, setRole } from '../../../../api/admin';
 import AddForm from './add-form';
 import AuthForm from './auth-form';
 import storageUtils from '../../../../utils/storageUtils'
-import {formateDate} from '../../../../utils/dateUtils'
+import {formateDate} from '../../../../utils/dateUtils';
+import { connect } from "react-redux";
+import { loginOut } from "@redux/actions";
 
 export class Role extends Component {
   state = {
@@ -97,13 +99,15 @@ export class Role extends Component {
     const menus = this.auth.current.getMenus();
     role.menus = menus;
     role.auth_time = Date.now();
-    role.auth_name = storageUtils.getUser().username;
+    // role.auth_name = storageUtils.getUser().username;
+    role.auth_name = this.props.user.username;
 
     const result = await setRole(role);
     if (result.status === 0) {
       //如果当前更新的是自己角色的权限，强制退出
-      if (role._id === torageUtils.getUser().role_id) {
-        storageUtils.removeUser();
+      if (role._id === this.props.user.role_id) {
+        // storageUtils.removeUser();
+        this.props.loginOut();
         this.props.history.replace('/login');
         message.success('当前用户角色修改成功');
       } else {
@@ -186,4 +190,7 @@ export class Role extends Component {
   }
 }
 
-export default Role
+export default connect(
+  state => ({user: state.user}),
+  {loginOut}
+)(Role)
